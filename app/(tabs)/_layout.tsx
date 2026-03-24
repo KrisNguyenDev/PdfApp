@@ -8,7 +8,9 @@ import { View } from "react-native";
 const TabIcon = ({ icon: Icon, focused }: { icon?: any; focused: boolean }) => {
   return (
     <View className="flex flex-row w-full justify-center items-center h-full">
-      {Icon && <Icon width={20} height={20} />}
+      {Icon && (
+        <Icon width={20} height={20} color={focused ? "#A30000" : "#A0A0A0"} />
+      )}
     </View>
   );
 };
@@ -17,6 +19,7 @@ const _layout = () => {
   return (
     <Tabs
       screenOptions={{
+        tabBarActiveTintColor: "#A30000",
         tabBarStyle: {},
         tabBarItemStyle: {},
       }}
