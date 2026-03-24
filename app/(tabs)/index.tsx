@@ -1,10 +1,10 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   return (
-    <View className="h-full">
-      <Text className="font-bold text-5xl text-center">Welcome!</Text>
+    <SafeAreaView className="bg-primary">
+      {/* <Text className="font-bold text-5xl text-center">Welcome!</Text>
       <Link
         className="mt-10 underline text-blue-500"
         href={{
@@ -13,7 +13,8 @@ export default function Index() {
         }}
       >
         Avengers movie
-      </Link>
-    </View>
+      </Link> */}
+      <View className="bg-yellow-300 h-full w-full"></View>
+    </SafeAreaView>
   );
 }

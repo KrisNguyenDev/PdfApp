@@ -27,7 +27,7 @@ const _layout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Document",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon icon={HomeSvg} focused={focused} />
