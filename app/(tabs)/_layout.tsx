@@ -1,12 +1,12 @@
-import home from "@/assets/icons/home.png";
+import HomeSvg from "@/assets/icons/home.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Image, View } from "react-native";
+import { View } from "react-native";
 
-const TabIcon = ({ icon, focused }: { icon?: any; focused: boolean }) => {
+const TabIcon = ({ icon: Icon, focused }: { icon?: any; focused: boolean }) => {
   return (
     <View className="flex flex-row w-full justify-center items-center h-full">
-      <Image source={icon} className="size-5" />
+      {Icon && <Icon width={20} height={20} />}
     </View>
   );
 };
@@ -25,7 +25,7 @@ const _layout = () => {
           title: "Home",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={home} focused={focused} />
+            <TabIcon icon={HomeSvg} focused={focused} />
           ),
         }}
       />
