@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "RoPhim",
-    "slug": "movie-app",
+    "name": "Pdf App",
+    "slug": "pdf-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/logo.png",
-    "scheme": "movieapp",
+    "scheme": "pdfapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
