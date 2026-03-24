@@ -90,13 +90,14 @@ export default function Index() {
 
       {/* PDF List */}
       <FlatList
+        style={{ paddingHorizontal: 16, paddingTop: 16 }}
         data={pdfFiles}
         keyExtractor={(item) => item.id}
         className="flex-1"
         renderItem={({ item }) => (
-          <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+          <View className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3">
             {/* PDF Icon */}
-            <View className="w-10 h-10 bg-red-500 rounded-lg items-center justify-center mr-3">
+            <View className="w-10 h-10 bg-primary rounded-lg items-center justify-center mr-3">
               <Ionicons name="document-text" size={20} color="white" />
             </View>
 
@@ -109,16 +110,6 @@ export default function Index() {
                 {item.date} | {item.time} | {item.size}
               </Text>
             </View>
-
-            {/* Pin Icon */}
-            {item.isPinned && (
-              <Ionicons
-                name="push"
-                size={20}
-                color="#B91C1C"
-                style={{ marginRight: 12 }}
-              />
-            )}
 
             {/* Star Icon */}
             <TouchableOpacity className="mr-3">
@@ -138,7 +129,7 @@ export default function Index() {
       />
 
       {/* FAB Button */}
-      <Pressable className="absolute bottom-6 right-6 w-14 h-14 bg-[#B91C1C] rounded-full items-center justify-center shadow-lg">
+      <Pressable className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg">
         <Ionicons name="add" size={28} color="white" />
       </Pressable>
     </View>
