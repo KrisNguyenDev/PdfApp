@@ -1,20 +1,12 @@
+import home from "@/assets/icons/home.png";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Image, Text, View } from "react-native";
+import { Image, View } from "react-native";
 
-const TabIcon = ({
-  tabName,
-  icon,
-  focused,
-}: {
-  tabName?: string;
-  icon?: any;
-  focused: boolean;
-}) => {
+const TabIcon = ({ icon, focused }: { icon?: any; focused: boolean }) => {
   return (
     <View className="flex flex-row w-full justify-center items-center h-full">
-      <Image source={icon} tintColor="#151312" className="size-5" />
-      <Text className="text-base font-semibold">{tabName}</Text>
+      <Image source={icon} className="size-5" />
     </View>
   );
 };
@@ -33,18 +25,14 @@ const _layout = () => {
           title: "Home",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="home-outline"
-              size={24}
-              color={focused ? "blue" : ""}
-            />
+            <TabIcon icon={home} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="recent"
         options={{
-          title: "Search",
+          title: "Recent",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -56,9 +44,9 @@ const _layout = () => {
         }}
       />
       <Tabs.Screen
-        name="saved"
+        name="favorite"
         options={{
-          title: "Saved",
+          title: "Favorite",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Ionicons
@@ -70,9 +58,9 @@ const _layout = () => {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="setting"
         options={{
-          title: "Profile",
+          title: "Setting",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Ionicons
