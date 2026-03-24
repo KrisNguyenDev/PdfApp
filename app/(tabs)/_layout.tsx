@@ -1,5 +1,7 @@
+import ClockSvg from "@/assets/icons/clock.svg";
 import HomeSvg from "@/assets/icons/home.svg";
-import { Ionicons } from "@expo/vector-icons";
+import MagicStarSvg from "@/assets/icons/magic-star.svg";
+import SettingSvg from "@/assets/icons/setting.svg";
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 
@@ -35,11 +37,7 @@ const _layout = () => {
           title: "Recent",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="search-outline"
-              size={24}
-              color={focused ? "blue" : ""}
-            />
+            <TabIcon icon={ClockSvg} focused={focused} />
           ),
         }}
       />
@@ -49,11 +47,7 @@ const _layout = () => {
           title: "Favorite",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="bookmark-outline"
-              size={24}
-              color={focused ? "blue" : ""}
-            />
+            <TabIcon icon={MagicStarSvg} focused={focused} />
           ),
         }}
       />
@@ -63,11 +57,7 @@ const _layout = () => {
           title: "Setting",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="person-outline"
-              size={24}
-              color={focused ? "blue" : ""}
-            />
+            <TabIcon icon={SettingSvg} focused={focused} />
           ),
         }}
       />
