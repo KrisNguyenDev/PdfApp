@@ -14,8 +14,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "2",
@@ -23,8 +23,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: true,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "3",
@@ -32,8 +32,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "4",
@@ -41,8 +41,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "5",
@@ -50,8 +50,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "6",
@@ -59,8 +59,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
   {
     id: "7",
@@ -68,8 +68,8 @@ const pdfFiles = [
     date: "2023/05/31",
     time: "11:37",
     size: "37.08KB",
-    isPinned: false,
     isFavorite: false,
+    updatedDate: "2023/05/31",
   },
 ];
 
