@@ -16,7 +16,7 @@ interface PdfContextType {
   pdfFiles: PdfFile[];
   addPdfFile: (file: PdfFile) => void;
   updatePdfFile: (id: string, updates: Partial<PdfFile>) => void;
-  deletePdfFile: (id: string) => void;
+  deletePdfFile: (id: string, uri?: string) => Promise<void>;
   toggleFavorite: (id: string) => void;
   refreshPdfFiles: () => Promise<void>;
 }
@@ -93,8 +93,18 @@ export function PdfProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const deletePdfFile = (id: string) => {
-    setPdfFiles((prev) => prev.filter((file) => file.id !== id));
+  const deletePdfFile = async (id: string, uri?: string) => {
+    try {
+      // Xóa file vật lý nếu có URI
+      if (uri) {
+        await FileSystem.deleteAsync(uri, { idempotent: true });
+      }
+      // Xóa khỏi state
+      setPdfFiles((prev) => prev.filter((file) => file.id !== id));
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      throw error;
+    }
   };
 
   const toggleFavorite = (id: string) => {

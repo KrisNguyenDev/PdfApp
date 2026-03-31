@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, Text, TouchableOpacity, View, Alert } from "react-native";
+import { usePdf } from "@/contexts/PdfContext";
 
 interface FileMenuModalProps {
   visible: boolean;
   onClose: () => void;
   selectedFile: {
+    id: string;
     name: string;
     uri?: string;
   } | null;
@@ -23,10 +25,11 @@ export default function FileMenuModal({
   onClose,
   selectedFile,
 }: FileMenuModalProps) {
-  const handleMenuAction = (optionId: string) => {
-    onClose();
-    
+  const { deletePdfFile } = usePdf();
+
+  const handleMenuAction = async (optionId: string) => {
     if (optionId === "1" && selectedFile?.uri) {
+      onClose();
       router.push({
         pathname: "/pdf-viewer",
         params: {
@@ -35,11 +38,38 @@ export default function FileMenuModal({
         },
       });
     } else if (optionId === "2") {
+      onClose();
       // TODO: Implement email functionality
     } else if (optionId === "3") {
+      onClose();
       // TODO: Implement share functionality
-    } else if (optionId === "4") {
-      // TODO: Implement delete functionality
+    } else if (optionId === "4" && selectedFile) {
+      // Delete functionality - show confirmation first
+      Alert.alert(
+        "Delete PDF",
+        `Are you sure you want to delete "${selectedFile.name}"?`,
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+            onPress: () => onClose(),
+          },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              onClose();
+              try {
+                await deletePdfFile(selectedFile.id, selectedFile.uri);
+                Alert.alert("Success", "PDF deleted successfully");
+              } catch (error) {
+                console.error("Error deleting PDF:", error);
+                Alert.alert("Error", "Failed to delete PDF. Please try again.");
+              }
+            },
+          },
+        ]
+      );
     }
   };
 
