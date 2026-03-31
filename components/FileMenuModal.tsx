@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Modal, Pressable, Text, TouchableOpacity, View, Alert } from "react-native";
 import { usePdf } from "@/contexts/PdfContext";
+import * as Sharing from "expo-sharing";
 
 interface FileMenuModalProps {
   visible: boolean;
@@ -40,9 +41,29 @@ export default function FileMenuModal({
     } else if (optionId === "2") {
       onClose();
       // TODO: Implement email functionality
-    } else if (optionId === "3") {
-      onClose();
-      // TODO: Implement share functionality
+    } else if (optionId === "3" && selectedFile?.uri) {
+      // Share A Copy functionality
+      try {
+        const isAvailable = await Sharing.isAvailableAsync();
+        
+        if (!isAvailable) {
+          onClose();
+          Alert.alert("Error", "Sharing is not available on this device");
+          return;
+        }
+
+        await Sharing.shareAsync(selectedFile.uri, {
+          mimeType: "application/pdf",
+          dialogTitle: `Share ${selectedFile.name}`,
+          UTI: "com.adobe.pdf",
+        });
+        
+        onClose();
+      } catch (error) {
+        console.error("Error sharing PDF:", error);
+        onClose();
+        Alert.alert("Error", "Failed to share PDF. Please try again.");
+      }
     } else if (optionId === "4" && selectedFile) {
       // Delete functionality - show confirmation first
       Alert.alert(
