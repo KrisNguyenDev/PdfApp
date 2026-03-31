@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 interface CreatePdfModalProps {
@@ -45,6 +46,12 @@ export default function CreatePdfModal({
                   key={option.id}
                   onPress={() => {
                     onClose();
+                    if (option.id === "1") {
+                      // Image to PDF
+                      router.push("/create-pdf/image-selection");
+                    } else if (option.id === "2") {
+                      // Scan Document - TODO: Implement later
+                    }
                   }}
                   className="flex-row items-center px-5 py-4 border-b border-gray-100"
                 >
