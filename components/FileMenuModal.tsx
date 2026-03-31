@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 interface FileMenuModalProps {
@@ -6,6 +7,7 @@ interface FileMenuModalProps {
   onClose: () => void;
   selectedFile: {
     name: string;
+    uri?: string;
   } | null;
 }
 
@@ -21,6 +23,26 @@ export default function FileMenuModal({
   onClose,
   selectedFile,
 }: FileMenuModalProps) {
+  const handleMenuAction = (optionId: string) => {
+    onClose();
+    
+    if (optionId === "1" && selectedFile?.uri) {
+      router.push({
+        pathname: "/pdf-viewer",
+        params: {
+          uri: encodeURIComponent(selectedFile.uri),
+          name: selectedFile.name,
+        },
+      });
+    } else if (optionId === "2") {
+      // TODO: Implement email functionality
+    } else if (optionId === "3") {
+      // TODO: Implement share functionality
+    } else if (optionId === "4") {
+      // TODO: Implement delete functionality
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -49,9 +71,7 @@ export default function FileMenuModal({
               {menuOptions.map((option) => (
                 <TouchableOpacity
                   key={option.id}
-                  onPress={() => {
-                    onClose();
-                  }}
+                  onPress={() => handleMenuAction(option.id)}
                   className="flex-row items-center px-5 py-4"
                 >
                   <View className="w-7 mr-4">

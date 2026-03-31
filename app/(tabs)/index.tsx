@@ -1,16 +1,17 @@
+import CreatePdfModal from "@/components/CreatePdfModal";
+import FileMenuModal from "@/components/FileMenuModal";
+import { usePdf } from "@/contexts/PdfContext";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
 } from "react-native";
-import FileMenuModal from "@/components/FileMenuModal";
-import CreatePdfModal from "@/components/CreatePdfModal";
-import { usePdf } from "@/contexts/PdfContext";
 
 export default function Index() {
   const [showModal, setShowModal] = useState(false);
@@ -19,9 +20,23 @@ export default function Index() {
   const [refreshing, setRefreshing] = useState(false);
   const { pdfFiles, toggleFavorite, refreshPdfFiles } = usePdf();
 
+  console.log(pdfFiles);
+
   const handleOpenMenu = (file: any) => {
     setSelectedFile(file);
     setShowModal(true);
+  };
+
+  const handleOpenPdf = (file: any) => {
+    if (file.uri) {
+      router.push({
+        pathname: "/pdf-viewer",
+        params: {
+          uri: encodeURIComponent(file.uri),
+          name: file.name,
+        },
+      });
+    }
   };
 
   const onRefresh = async () => {
@@ -70,7 +85,11 @@ export default function Index() {
           </View>
         }
         renderItem={({ item }) => (
-          <View className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3">
+          <TouchableOpacity
+            onPress={() => handleOpenPdf(item)}
+            className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3"
+            activeOpacity={0.7}
+          >
             {/* PDF Icon */}
             <View className="w-10 h-10 bg-primary rounded-lg items-center justify-center mr-3">
               <Ionicons name="document-text" size={20} color="white" />
@@ -89,7 +108,10 @@ export default function Index() {
             {/* Star Icon */}
             <TouchableOpacity
               className="mr-3"
-              onPress={() => toggleFavorite(item.id)}
+              onPress={(e) => {
+                e.stopPropagation();
+                toggleFavorite(item.id);
+              }}
             >
               <Ionicons
                 name={item.isFavorite ? "star" : "star-outline"}
@@ -99,10 +121,15 @@ export default function Index() {
             </TouchableOpacity>
 
             {/* Menu Icon */}
-            <TouchableOpacity onPress={() => handleOpenMenu(item)}>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                handleOpenMenu(item);
+              }}
+            >
               <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       />
 

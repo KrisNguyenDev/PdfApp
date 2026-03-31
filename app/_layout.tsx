@@ -11,6 +11,10 @@ export default function RootLayout() {
           name="create-pdf/image-selection"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="pdf-viewer"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </PdfProvider>
   );
