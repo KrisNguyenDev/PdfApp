@@ -129,13 +129,13 @@ export default function ImageSelection() {
 
       {/* Bottom Actions */}
       <View className="px-4 pb-8 pt-4 border-t border-gray-200">
-        <View className="flex-row justify-center mb-4 gap-8">
+        <View className="flex-row justify-center items-center gap-4">
           {/* Pick from Gallery */}
           <TouchableOpacity
             onPress={pickImages}
             className="items-center justify-center"
           >
-            <View className="w-14 h-14 bg-gray-100 rounded-full items-center justify-center mb-2">
+            <View className="w-14 h-14 bg-gray-100 rounded-full items-center justify-center">
               <Ionicons name="images-outline" size={28} color="#B91C1C" />
             </View>
           </TouchableOpacity>
@@ -145,24 +145,24 @@ export default function ImageSelection() {
             onPress={takePhoto}
             className="items-center justify-center"
           >
-            <View className="w-14 h-14 bg-gray-100 rounded-full items-center justify-center mb-2">
+            <View className="w-14 h-14 bg-gray-100 rounded-full items-center justify-center">
               <Ionicons name="camera-outline" size={28} color="#B91C1C" />
             </View>
           </TouchableOpacity>
-        </View>
 
-        {/* Convert to PDF Button */}
-        <TouchableOpacity
-          onPress={handleConvertToPdf}
-          disabled={selectedImages.length === 0}
-          className={`${
-            selectedImages.length === 0 ? "bg-gray-300" : "bg-primary"
-          } py-4 rounded-xl items-center`}
-        >
-          <Text className="text-white text-base font-semibold">
-            Convert to PDF
-          </Text>
-        </TouchableOpacity>
+          {/* Convert to PDF Button */}
+          <TouchableOpacity
+            onPress={handleConvertToPdf}
+            disabled={selectedImages.length === 0}
+            className={`${
+              selectedImages.length === 0 ? "bg-gray-300" : "bg-primary"
+            } flex-1 py-4 rounded-xl items-center`}
+          >
+            <Text className="text-white text-base font-semibold">
+              Convert to PDF
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
