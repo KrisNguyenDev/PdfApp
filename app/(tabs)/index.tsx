@@ -6,84 +6,28 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from "react-native";
 import FileMenuModal from "@/components/FileMenuModal";
 import CreatePdfModal from "@/components/CreatePdfModal";
-
-const pdfFiles = [
-  {
-    id: "1",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "2",
-    name: "How to optimize images in...",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "3",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "4",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "5",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "6",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-  {
-    id: "7",
-    name: "All PDF Reader",
-    date: "2023/05/31",
-    time: "11:37",
-    size: "37.08KB",
-    isFavorite: false,
-    updatedDate: "2023/05/31",
-  },
-];
+import { usePdf } from "@/contexts/PdfContext";
 
 export default function Index() {
   const [showModal, setShowModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { pdfFiles, toggleFavorite, refreshPdfFiles } = usePdf();
 
   const handleOpenMenu = (file: any) => {
     setSelectedFile(file);
     setShowModal(true);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshPdfFiles();
+    setRefreshing(false);
   };
 
   return (
@@ -106,6 +50,25 @@ export default function Index() {
         data={pdfFiles}
         keyExtractor={(item) => item.id}
         className="flex-1"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#B91C1C"
+            colors={["#B91C1C"]}
+          />
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center py-20">
+            <Ionicons name="document-text-outline" size={80} color="#9CA3AF" />
+            <Text className="text-gray-400 text-base mt-4">
+              No PDF files yet
+            </Text>
+            <Text className="text-gray-400 text-sm mt-1">
+              Tap the + button to create your first PDF
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <View className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3">
             {/* PDF Icon */}
@@ -124,7 +87,10 @@ export default function Index() {
             </View>
 
             {/* Star Icon */}
-            <TouchableOpacity className="mr-3">
+            <TouchableOpacity
+              className="mr-3"
+              onPress={() => toggleFavorite(item.id)}
+            >
               <Ionicons
                 name={item.isFavorite ? "star" : "star-outline"}
                 size={22}
