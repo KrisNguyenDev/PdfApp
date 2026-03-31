@@ -69,6 +69,7 @@ export default function ImageSelection() {
   };
 
   const handleConvertToPdf = async () => {
+    debugger
     if (selectedImages.length === 0) {
       Alert.alert("No Images", "Please select at least one image to convert.");
       return;
@@ -77,23 +78,59 @@ export default function ImageSelection() {
     setIsConverting(true);
 
     try {
-      const imagesHtml = selectedImages
+      debugger
+      console.log("=== Starting PDF conversion ===");
+      console.log("Number of images:", selectedImages.length);
+      console.log("Image URIs:", selectedImages);
+
+      // Convert tất cả ảnh thành base64 với auto-detect mime type
+      const imagesBase64 = await Promise.all(
+        selectedImages.map(async (uri, index) => {
+          console.log(`Converting image ${index + 1}:`, uri);
+          const base64 = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          console.log(`Base64 length for image ${index + 1}:`, base64.length);
+          
+          // Detect image type từ URI hoặc default là PNG
+          const mimeType = uri.toLowerCase().endsWith('.jpg') || uri.toLowerCase().endsWith('.jpeg') 
+            ? 'image/jpeg' 
+            : 'image/png';
+          console.log(`MIME type for image ${index + 1}:`, mimeType);
+          
+          return `data:${mimeType};base64,${base64}`;
+        })
+      );
+
+      console.log("All images converted to base64");
+
+      // Tạo HTML với base64 images
+      const imagesHtml = imagesBase64
         .map(
-          (uri) => `
-        <div style="page-break-after: always; text-align: center; height: 100vh; display: flex; align-items: center; justify-content: center;">
-          <img src="${uri}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          (dataUri, index) => `
+        <div style="page-break-after: ${index < imagesBase64.length - 1 ? 'always' : 'auto'}; padding: 20px; text-align: center;">
+          <img src="${dataUri}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" />
         </div>
       `
         )
         .join("");
 
       const html = `
+        <!DOCTYPE html>
         <html>
           <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { margin: 0; padding: 0; }
-              img { display: block; margin: auto; }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: Arial, sans-serif;
+                background: white;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+              }
             </style>
           </head>
           <body>
@@ -102,7 +139,15 @@ export default function ImageSelection() {
         </html>
       `;
 
-      const { uri } = await Print.printToFileAsync({ html });
+      console.log("HTML generated, length:", html.length);
+      console.log("Calling Print.printToFileAsync...");
+
+      const { uri } = await Print.printToFileAsync({ 
+        html,
+        base64: false,
+      });
+
+      console.log("PDF created at temp location:", uri);
 
       const timestamp = new Date().getTime();
       const fileName = `PDF_${timestamp}.pdf`;
@@ -113,7 +158,17 @@ export default function ImageSelection() {
         to: fileUri,
       });
 
+      console.log("PDF moved to:", fileUri);
+
+      // Check file size
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
+      if (fileInfo.exists && "size" in fileInfo) {
+        console.log("PDF file size:", fileInfo.size, "bytes");
+      }
+
       await refreshPdfFiles();
+
+      console.log("=== PDF conversion completed ===");
 
       Alert.alert(
         "Success",
@@ -126,7 +181,8 @@ export default function ImageSelection() {
         ]
       );
     } catch (error) {
-      console.error("Error creating PDF:", error);
+      console.error("=== Error creating PDF ===");
+      console.error("Error:", error);
       Alert.alert("Error", "Failed to create PDF. Please try again.");
     } finally {
       setIsConverting(false);
