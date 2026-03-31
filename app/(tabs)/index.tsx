@@ -77,6 +77,7 @@ const pdfFiles = [
 
 export default function Index() {
   const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
 
   const menuOptions = [
@@ -84,6 +85,11 @@ export default function Index() {
     { id: "2", label: "Email", icon: "mail-outline" },
     { id: "3", label: "Share A Copy", icon: "share-social-outline" },
     { id: "4", label: "Delete", icon: "trash-outline" },
+  ];
+
+  const createOptions = [
+    { id: "1", label: "Image to PDF", icon: "image-outline" },
+    { id: "2", label: "Scan Document", icon: "camera-outline" },
   ];
 
   const handleOpenMenu = (file: any) => {
@@ -146,11 +152,14 @@ export default function Index() {
       />
 
       {/* FAB Button */}
-      <Pressable className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg">
+      <Pressable
+        onPress={() => setShowCreateModal(true)}
+        className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg"
+      >
         <Ionicons name="add" size={28} color="white" />
       </Pressable>
 
-      {/* Modal */}
+      {/* File Menu Modal */}
       <Modal
         visible={showModal}
         transparent
@@ -190,6 +199,63 @@ export default function Index() {
                       <Ionicons
                         name={option.icon as any}
                         size={24}
+                        color="#B91C1C"
+                      />
+                    </View>
+                    <Text className="text-gray-900 text-base">
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Create PDF Modal */}
+      <Modal
+        visible={showCreateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCreateModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setShowCreateModal(false)}
+        >
+          <View className="flex-1 justify-center items-center px-6">
+            <Pressable
+              className="bg-white rounded-2xl w-full max-w-md overflow-hidden"
+              onPress={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <View className="bg-primary px-5 py-4 flex-row items-center">
+                <TouchableOpacity
+                  onPress={() => setShowCreateModal(false)}
+                  className="mr-4"
+                >
+                  <Ionicons name="close" size={24} color="white" />
+                </TouchableOpacity>
+                <Text className="text-white text-xl font-semibold">
+                  Create PDF
+                </Text>
+              </View>
+
+              {/* Create Options */}
+              <View className="py-2">
+                {createOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    onPress={() => {
+                      setShowCreateModal(false);
+                    }}
+                    className="flex-row items-center px-5 py-4 border-b border-gray-100"
+                  >
+                    <View className="w-8 mr-4">
+                      <Ionicons
+                        name={option.icon as any}
+                        size={28}
                         color="#B91C1C"
                       />
                     </View>
