@@ -24,6 +24,7 @@ interface PdfContextType {
   addPdfFile: (file: PdfFile) => Promise<void>;
   updatePdfFile: (id: string, updates: Partial<PdfFile>) => Promise<void>;
   deletePdfFile: (id: string, uri?: string) => Promise<void>;
+  renamePdfFile: (id: string, newName: string, uri?: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
   refreshPdfFiles: () => Promise<void>;
   updateLastOpened: (id: string) => Promise<void>;
@@ -176,6 +177,58 @@ export function PdfProvider({ children }: { children: ReactNode }) {
     }
   }, [loadMetadata, saveMetadata]);
 
+  const renamePdfFile = useCallback(async (id: string, newName: string, uri?: string) => {
+    try {
+      if (!uri) {
+        throw new Error("File URI is required");
+      }
+
+      // Sanitize new name (remove .pdf if provided, we'll add it)
+      const sanitizedName = newName.replace(/\.pdf$/i, "");
+      if (!sanitizedName.trim()) {
+        throw new Error("File name cannot be empty");
+      }
+
+      const newFileName = `${sanitizedName}.pdf`;
+      const newUri = `${FileSystem.documentDirectory}${newFileName}`;
+
+      // Check if file with new name already exists
+      const fileInfo = await FileSystem.getInfoAsync(newUri);
+      if (fileInfo.exists) {
+        throw new Error("A file with this name already exists");
+      }
+
+      // Rename file in file system
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      // Update metadata with new key
+      const metadata = await loadMetadata();
+      const oldMetadata = metadata[id];
+      
+      // Remove old metadata
+      delete metadata[id];
+      
+      // Add new metadata with new file name as key
+      if (oldMetadata) {
+        metadata[newFileName] = {
+          ...oldMetadata,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      
+      await saveMetadata(metadata);
+
+      // Refresh files to get updated list
+      await loadPdfFiles();
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      throw error;
+    }
+  }, [loadMetadata, saveMetadata, loadPdfFiles]);
+
   const toggleFavorite = useCallback(async (id: string) => {
     let newFavoriteValue: boolean | undefined;
 
@@ -225,6 +278,7 @@ export function PdfProvider({ children }: { children: ReactNode }) {
         addPdfFile,
         updatePdfFile,
         deletePdfFile,
+        renamePdfFile,
         toggleFavorite,
         refreshPdfFiles,
         updateLastOpened,
