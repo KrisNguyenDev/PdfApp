@@ -28,7 +28,7 @@ export default function ImageSelection() {
   const getDefaultFileName = () => {
     const now = new Date();
     const dateStr = now.toLocaleDateString("en-GB").replace(/\//g, "");
-    return `All PDF Reader ${dateStr}`;
+    return `PDF ${dateStr}`;
   };
 
   const pickImages = async () => {
