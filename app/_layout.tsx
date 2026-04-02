@@ -1,9 +1,9 @@
-import { Stack } from "expo-router";
-import "./global.css";
-import { PdfProvider } from "@/contexts/PdfContext";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import OnboardingScreen from "@/components/OnboardingScreen";
+import { PdfProvider } from "@/contexts/PdfContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
+import "./global.css";
 
 export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,9 +15,11 @@ export default function RootLayout() {
 
   const checkOnboarding = async () => {
     try {
-      const hasSeenOnboarding = await AsyncStorage.getItem("@has_seen_onboarding");
+      const hasSeenOnboarding = await AsyncStorage.getItem(
+        "@has_seen_onboarding",
+      );
       // FORCE SHOW ONBOARDING FOR TESTING - Remove this line after testing
-      setShowOnboarding(true); // Change to: hasSeenOnboarding !== "true"
+      setShowOnboarding(hasSeenOnboarding !== "true"); // Change to: hasSeenOnboarding !== "true"
     } catch (error) {
       console.error("Error checking onboarding status:", error);
       setShowOnboarding(true);
@@ -55,10 +57,7 @@ export default function RootLayout() {
           name="create-pdf/image-selection"
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="pdf-viewer"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="pdf-viewer" options={{ headerShown: false }} />
       </Stack>
     </PdfProvider>
   );
