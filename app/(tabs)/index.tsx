@@ -3,7 +3,7 @@ import FileMenuModal from "@/components/FileMenuModal";
 import { usePdf } from "@/contexts/PdfContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -30,21 +30,35 @@ export default function Index() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { pdfFiles, toggleFavorite, refreshPdfFiles, updateLastOpened } =
     usePdf();
 
   const filteredFiles = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return pdfFiles;
+    let files = pdfFiles;
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      files = files.filter((file) => file.name.toLowerCase().includes(query));
     }
     
-    const query = searchQuery.toLowerCase();
-    return pdfFiles.filter((file) =>
-      file.name.toLowerCase().includes(query)
-    );
-  }, [pdfFiles, searchQuery]);
+    // Sort by name
+    const sorted = [...files].sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      
+      if (sortOrder === 'asc') {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+    
+    return sorted;
+  }, [pdfFiles, searchQuery, sortOrder]);
 
   console.log(pdfFiles);
 
@@ -53,6 +67,10 @@ export default function Index() {
     if (showSearch) {
       setSearchQuery("");
     }
+  };
+
+  const handleToggleSort = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
   const handleOpenMenu = (file: any) => {
@@ -90,7 +108,13 @@ export default function Index() {
             <TouchableOpacity onPress={handleToggleSearch}>
               <Ionicons name="search-outline" size={24} color="white" />
             </TouchableOpacity>
-            <Ionicons name="menu" size={24} color="white" />
+            <TouchableOpacity onPress={handleToggleSort}>
+              <Ionicons 
+                name={sortOrder === 'asc' ? "arrow-down" : "arrow-up"} 
+                size={24} 
+                color="white" 
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -131,19 +155,18 @@ export default function Index() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-20">
-            <Ionicons 
-              name={searchQuery ? "search-outline" : "document-text-outline"} 
-              size={80} 
-              color="#9CA3AF" 
+            <Ionicons
+              name={searchQuery ? "search-outline" : "document-text-outline"}
+              size={80}
+              color="#9CA3AF"
             />
             <Text className="text-gray-400 text-base mt-4">
               {searchQuery ? "No PDF files found" : "No PDF files yet"}
             </Text>
             <Text className="text-gray-400 text-sm mt-1">
-              {searchQuery 
-                ? `No results for "${searchQuery}"` 
-                : "Tap the + button to create your first PDF"
-              }
+              {searchQuery
+                ? `No results for "${searchQuery}"`
+                : "Tap the + button to create your first PDF"}
             </Text>
           </View>
         }
