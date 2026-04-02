@@ -3,12 +3,13 @@ import FileMenuModal from "@/components/FileMenuModal";
 import { usePdf } from "@/contexts/PdfContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   FlatList,
   Pressable,
   RefreshControl,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,11 +28,32 @@ const formatDateTime = (isoString: string) => {
 export default function Index() {
   const [showModal, setShowModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const { pdfFiles, toggleFavorite, refreshPdfFiles, updateLastOpened } = usePdf();
+  const { pdfFiles, toggleFavorite, refreshPdfFiles, updateLastOpened } =
+    usePdf();
+
+  const filteredFiles = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return pdfFiles;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return pdfFiles.filter((file) =>
+      file.name.toLowerCase().includes(query)
+    );
+  }, [pdfFiles, searchQuery]);
 
   console.log(pdfFiles);
+
+  const handleToggleSearch = () => {
+    setShowSearch(!showSearch);
+    if (showSearch) {
+      setSearchQuery("");
+    }
+  };
 
   const handleOpenMenu = (file: any) => {
     setSelectedFile(file);
@@ -65,17 +87,38 @@ export default function Index() {
         <View className="flex-row items-center justify-between mb-1">
           <Text className="text-white text-2xl font-bold">All PDF Reader</Text>
           <View className="flex-row items-center gap-4">
-            <Ionicons name="notifications-outline" size={24} color="white" />
-            <Ionicons name="search-outline" size={24} color="white" />
+            <TouchableOpacity onPress={handleToggleSearch}>
+              <Ionicons name="search-outline" size={24} color="white" />
+            </TouchableOpacity>
             <Ionicons name="menu" size={24} color="white" />
           </View>
         </View>
+
+        {/* Search Input */}
+        {showSearch && (
+          <View className="flex-row items-center bg-white rounded-full px-4 py-2 mt-3">
+            <Ionicons name="search-outline" size={20} color="#9CA3AF" />
+            <TextInput
+              className="flex-1 ml-3 text-base text-gray-900"
+              placeholder="Search PDF files..."
+              placeholderTextColor="#9CA3AF"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
 
       {/* PDF List */}
       <FlatList
         style={{ paddingHorizontal: 16, paddingTop: 16 }}
-        data={pdfFiles}
+        data={filteredFiles}
         keyExtractor={(item) => item.id}
         className="flex-1"
         refreshControl={
@@ -88,12 +131,19 @@ export default function Index() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-20">
-            <Ionicons name="document-text-outline" size={80} color="#9CA3AF" />
+            <Ionicons 
+              name={searchQuery ? "search-outline" : "document-text-outline"} 
+              size={80} 
+              color="#9CA3AF" 
+            />
             <Text className="text-gray-400 text-base mt-4">
-              No PDF files yet
+              {searchQuery ? "No PDF files found" : "No PDF files yet"}
             </Text>
             <Text className="text-gray-400 text-sm mt-1">
-              Tap the + button to create your first PDF
+              {searchQuery 
+                ? `No results for "${searchQuery}"` 
+                : "Tap the + button to create your first PDF"
+              }
             </Text>
           </View>
         }
