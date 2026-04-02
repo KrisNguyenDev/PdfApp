@@ -1,19 +1,19 @@
+import { usePdf } from "@/contexts/PdfContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import * as Print from "expo-print";
-import * as FileSystem from "expo-file-system/legacy";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  Alert,
-  ActivityIndicator,
 } from "react-native";
-import { usePdf } from "@/contexts/PdfContext";
 
 export default function ImageSelection() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -22,11 +22,11 @@ export default function ImageSelection() {
 
   const pickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== "granted") {
       Alert.alert(
         "Permission Required",
-        "Sorry, we need camera roll permissions to select images."
+        "Sorry, we need camera roll permissions to select images.",
       );
       return;
     }
@@ -45,11 +45,11 @@ export default function ImageSelection() {
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    
+
     if (status !== "granted") {
       Alert.alert(
         "Permission Required",
-        "Sorry, we need camera permissions to take photos."
+        "Sorry, we need camera permissions to take photos.",
       );
       return;
     }
@@ -69,7 +69,6 @@ export default function ImageSelection() {
   };
 
   const handleConvertToPdf = async () => {
-    debugger
     if (selectedImages.length === 0) {
       Alert.alert("No Images", "Please select at least one image to convert.");
       return;
@@ -78,7 +77,6 @@ export default function ImageSelection() {
     setIsConverting(true);
 
     try {
-      debugger
       console.log("=== Starting PDF conversion ===");
       console.log("Number of images:", selectedImages.length);
       console.log("Image URIs:", selectedImages);
@@ -91,27 +89,29 @@ export default function ImageSelection() {
             encoding: FileSystem.EncodingType.Base64,
           });
           console.log(`Base64 length for image ${index + 1}:`, base64.length);
-          
+
           // Detect image type từ URI hoặc default là PNG
-          const mimeType = uri.toLowerCase().endsWith('.jpg') || uri.toLowerCase().endsWith('.jpeg') 
-            ? 'image/jpeg' 
-            : 'image/png';
+          const mimeType =
+            uri.toLowerCase().endsWith(".jpg") ||
+            uri.toLowerCase().endsWith(".jpeg")
+              ? "image/jpeg"
+              : "image/png";
           console.log(`MIME type for image ${index + 1}:`, mimeType);
-          
+
           return `data:${mimeType};base64,${base64}`;
-        })
+        }),
       );
 
       console.log("All images converted to base64");
 
-      // Tạo HTML với base64 images
+      // Tạo HTML với base64 images - fixed height approach
       const imagesHtml = imagesBase64
         .map(
           (dataUri, index) => `
-        <div style="page-break-after: ${index < imagesBase64.length - 1 ? 'always' : 'auto'}; padding: 20px; text-align: center;">
-          <img src="${dataUri}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+        <div style="width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background: white;">
+          <img src="${dataUri}" style="max-width: 95%; max-height: 95%; object-fit: contain;" />
         </div>
-      `
+      `,
         )
         .join("");
 
@@ -120,16 +120,13 @@ export default function ImageSelection() {
         <html>
           <head>
             <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { 
-                font-family: Arial, sans-serif;
-                background: white;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
+              html, body { 
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
               }
             </style>
           </head>
@@ -142,7 +139,7 @@ export default function ImageSelection() {
       console.log("HTML generated, length:", html.length);
       console.log("Calling Print.printToFileAsync...");
 
-      const { uri } = await Print.printToFileAsync({ 
+      const { uri } = await Print.printToFileAsync({
         html,
         base64: false,
       });
@@ -178,7 +175,7 @@ export default function ImageSelection() {
             text: "OK",
             onPress: () => router.back(),
           },
-        ]
+        ],
       );
     } catch (error) {
       console.error("=== Error creating PDF ===");

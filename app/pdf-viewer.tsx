@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
-import { useState, useEffect, useCallback } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import * as Sharing from "expo-sharing";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Text,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import * as Sharing from "expo-sharing";
 
 export default function PdfViewer() {
   const { uri, name } = useLocalSearchParams<{ uri: string; name: string }>();
@@ -22,13 +22,11 @@ export default function PdfViewer() {
       if (!uri) return;
 
       const decodedUri = decodeURIComponent(uri);
-      console.log("Loading PDF from:", decodedUri);
-      
+
       const base64 = await FileSystem.readAsStringAsync(decodedUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      console.log("PDF loaded, base64 length:", base64.length);
       setPdfBase64(base64);
       setLoading(false);
     } catch (error) {
@@ -45,10 +43,10 @@ export default function PdfViewer() {
   const handleShare = async () => {
     try {
       if (!uri) return;
-      
+
       const decodedUri = decodeURIComponent(uri);
       const isAvailable = await Sharing.isAvailableAsync();
-      
+
       if (!isAvailable) {
         Alert.alert("Error", "Sharing is not available on this device");
         return;
