@@ -26,16 +26,18 @@ export default function FileMenuModal({
   onClose,
   selectedFile,
 }: FileMenuModalProps) {
-  const { deletePdfFile } = usePdf();
+  const { deletePdfFile, updateLastOpened } = usePdf();
 
   const handleMenuAction = async (optionId: string) => {
     if (optionId === "1" && selectedFile?.uri) {
       onClose();
+      await updateLastOpened(selectedFile.id);
       router.push({
         pathname: "/pdf-viewer",
         params: {
           uri: encodeURIComponent(selectedFile.uri),
           name: selectedFile.name,
+          id: selectedFile.id,
         },
       });
     } else if (optionId === "2") {

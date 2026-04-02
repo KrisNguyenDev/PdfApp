@@ -1,3 +1,4 @@
+import { usePdf } from "@/contexts/PdfContext";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import { router, useLocalSearchParams } from "expo-router";
@@ -13,9 +14,16 @@ import {
 import { WebView } from "react-native-webview";
 
 export default function PdfViewer() {
-  const { uri, name } = useLocalSearchParams<{ uri: string; name: string }>();
+  const { uri, name, id } = useLocalSearchParams<{ uri: string; name: string; id: string }>();
   const [pdfBase64, setPdfBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { updateLastOpened } = usePdf();
+
+  useEffect(() => {
+    if (id) {
+      updateLastOpened(id);
+    }
+  }, [id, updateLastOpened]);
 
   const loadPdf = useCallback(async () => {
     try {

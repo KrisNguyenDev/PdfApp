@@ -13,12 +13,23 @@ import {
   View,
 } from "react-native";
 
+const formatDateTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const dateStr = date.toLocaleDateString("en-GB");
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return { date: dateStr, time: timeStr };
+};
+
 export default function Index() {
   const [showModal, setShowModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const { pdfFiles, toggleFavorite, refreshPdfFiles } = usePdf();
+  const { pdfFiles, toggleFavorite, refreshPdfFiles, updateLastOpened } = usePdf();
 
   console.log(pdfFiles);
 
@@ -27,13 +38,15 @@ export default function Index() {
     setShowModal(true);
   };
 
-  const handleOpenPdf = (file: any) => {
+  const handleOpenPdf = async (file: any) => {
     if (file.uri) {
+      await updateLastOpened(file.id);
       router.push({
         pathname: "/pdf-viewer",
         params: {
           uri: encodeURIComponent(file.uri),
           name: file.name,
+          id: file.id,
         },
       });
     }
@@ -84,53 +97,56 @@ export default function Index() {
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => handleOpenPdf(item)}
-            className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3"
-            activeOpacity={0.7}
-          >
-            {/* PDF Icon */}
-            <View className="w-10 h-10 bg-primary rounded-lg items-center justify-center mr-3">
-              <Ionicons name="document-text" size={20} color="white" />
-            </View>
-
-            {/* File Info */}
-            <View className="flex-1">
-              <Text className="text-gray-900 font-medium text-base mb-1">
-                {item.name}
-              </Text>
-              <Text className="text-gray-400 text-xs">
-                {item.date} | {item.time} | {item.size}
-              </Text>
-            </View>
-
-            {/* Star Icon */}
+        renderItem={({ item }) => {
+          const { date, time } = formatDateTime(item.createdAt);
+          return (
             <TouchableOpacity
-              className="mr-3"
-              onPress={(e) => {
-                e.stopPropagation();
-                toggleFavorite(item.id);
-              }}
+              onPress={() => handleOpenPdf(item)}
+              className="flex-row items-center px-4 py-3 border border-spacing-10 border-gray-300 rounded-lg mb-3"
+              activeOpacity={0.7}
             >
-              <Ionicons
-                name={item.isFavorite ? "star" : "star-outline"}
-                size={22}
-                color={item.isFavorite ? "#FCD34D" : "#9CA3AF"}
-              />
-            </TouchableOpacity>
+              {/* PDF Icon */}
+              <View className="w-10 h-10 bg-primary rounded-lg items-center justify-center mr-3">
+                <Ionicons name="document-text" size={20} color="white" />
+              </View>
 
-            {/* Menu Icon */}
-            <TouchableOpacity
-              onPress={(e) => {
-                e.stopPropagation();
-                handleOpenMenu(item);
-              }}
-            >
-              <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
+              {/* File Info */}
+              <View className="flex-1">
+                <Text className="text-gray-900 font-medium text-base mb-1">
+                  {item.name}
+                </Text>
+                <Text className="text-gray-400 text-xs">
+                  {date} | {time} | {item.size}
+                </Text>
+              </View>
+
+              {/* Star Icon */}
+              <TouchableOpacity
+                className="mr-3"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(item.id);
+                }}
+              >
+                <Ionicons
+                  name={item.isFavorite ? "star" : "star-outline"}
+                  size={22}
+                  color={item.isFavorite ? "#FCD34D" : "#9CA3AF"}
+                />
+              </TouchableOpacity>
+
+              {/* Menu Icon */}
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleOpenMenu(item);
+                }}
+              >
+                <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        )}
+          );
+        }}
       />
 
       {/* FAB Button */}
