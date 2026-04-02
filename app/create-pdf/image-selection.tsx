@@ -9,8 +9,11 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,7 +21,15 @@ import {
 export default function ImageSelection() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isConverting, setIsConverting] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState("");
   const { refreshPdfFiles } = usePdf();
+
+  const getDefaultFileName = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-GB").replace(/\//g, "");
+    return `All PDF Reader ${dateStr}`;
+  };
 
   const pickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -68,16 +79,22 @@ export default function ImageSelection() {
     setSelectedImages(newImages);
   };
 
-  const handleConvertToPdf = async () => {
+  const handleShowNameModal = () => {
     if (selectedImages.length === 0) {
       Alert.alert("No Images", "Please select at least one image to convert.");
       return;
     }
+    setPdfFileName(getDefaultFileName());
+    setShowNameModal(true);
+  };
 
+  const convertToPdf = async (fileName: string) => {
+    setShowNameModal(false);
     setIsConverting(true);
 
     try {
       console.log("=== Starting PDF conversion ===");
+      console.log("File name:", fileName);
       console.log("Number of images:", selectedImages.length);
       console.log("Image URIs:", selectedImages);
 
@@ -146,9 +163,10 @@ export default function ImageSelection() {
 
       console.log("PDF created at temp location:", uri);
 
-      const timestamp = new Date().getTime();
-      const fileName = `PDF_${timestamp}.pdf`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+      // Use custom file name
+      const sanitizedFileName = fileName.replace(/\.pdf$/i, "");
+      const finalFileName = `${sanitizedFileName}.pdf`;
+      const fileUri = `${FileSystem.documentDirectory}${finalFileName}`;
 
       await FileSystem.moveAsync({
         from: uri,
@@ -186,6 +204,14 @@ export default function ImageSelection() {
     }
   };
 
+  const handleSavePdf = () => {
+    if (!pdfFileName.trim()) {
+      Alert.alert("Error", "Please enter a file name");
+      return;
+    }
+    convertToPdf(pdfFileName);
+  };
+
   return (
     <View className="flex-1 bg-white">
       <View className="bg-primary px-4 pt-14 pb-4">
@@ -198,7 +224,7 @@ export default function ImageSelection() {
               All PDF Reader
             </Text>
           </View>
-          <TouchableOpacity onPress={handleConvertToPdf}>
+          <TouchableOpacity onPress={handleShowNameModal}>
             <Ionicons name="checkmark" size={28} color="white" />
           </TouchableOpacity>
         </View>
@@ -266,7 +292,7 @@ export default function ImageSelection() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleConvertToPdf}
+              onPress={handleShowNameModal}
               disabled={selectedImages.length === 0}
               className={`${
                 selectedImages.length === 0 ? "bg-gray-300" : "bg-primary"
@@ -279,6 +305,65 @@ export default function ImageSelection() {
           </View>
         )}
       </View>
+
+      {/* Name Modal */}
+      <Modal
+        visible={showNameModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNameModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setShowNameModal(false)}
+        >
+          <View className="flex-1 justify-center items-center px-6">
+            <Pressable
+              className="bg-white rounded-2xl w-full max-w-md"
+              onPress={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <View className="bg-primary px-5 py-4 rounded-t-2xl flex-row items-center justify-between">
+                <TouchableOpacity onPress={() => setShowNameModal(false)}>
+                  <Ionicons name="close" size={24} color="white" />
+                </TouchableOpacity>
+                <Text className="text-white text-xl font-semibold flex-1 text-center">
+                  Covert to PDF
+                </Text>
+                <TouchableOpacity onPress={handleSavePdf}>
+                  <Text className="text-white text-base font-semibold">
+                    Save
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Input */}
+              <View className="px-5 py-6">
+                <TextInput
+                  className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+                  placeholder="Enter PDF file name"
+                  value={pdfFileName}
+                  onChangeText={setPdfFileName}
+                  autoFocus
+                  selectTextOnFocus
+                />
+              </View>
+
+              {/* Save Button */}
+              <View className="px-5 pb-5">
+                <TouchableOpacity
+                  onPress={handleSavePdf}
+                  className="bg-primary py-4 rounded-xl items-center"
+                >
+                  <Text className="text-white text-base font-semibold">
+                    Save
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
