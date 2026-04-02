@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import * as FileSystem from "expo-file-system/legacy";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface PdfFile {
   id: string;
@@ -14,10 +15,10 @@ export interface PdfFile {
 
 interface PdfContextType {
   pdfFiles: PdfFile[];
-  addPdfFile: (file: PdfFile) => void;
-  updatePdfFile: (id: string, updates: Partial<PdfFile>) => void;
+  addPdfFile: (file: PdfFile) => Promise<void>;
+  updatePdfFile: (id: string, updates: Partial<PdfFile>) => Promise<void>;
   deletePdfFile: (id: string, uri?: string) => Promise<void>;
-  toggleFavorite: (id: string) => void;
+  toggleFavorite: (id: string) => Promise<void>;
   refreshPdfFiles: () => Promise<void>;
 }
 
@@ -26,7 +27,27 @@ const PdfContext = createContext<PdfContextType | undefined>(undefined);
 export function PdfProvider({ children }: { children: ReactNode }) {
   const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
 
-  const loadPdfFiles = async () => {
+  const METADATA_KEY = "@pdf_metadata";
+
+  const loadMetadata = useCallback(async (): Promise<Record<string, Partial<PdfFile>>> => {
+    try {
+      const data = await AsyncStorage.getItem(METADATA_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch (error) {
+      console.error("Error loading metadata:", error);
+      return {};
+    }
+  }, [METADATA_KEY]);
+
+  const saveMetadata = useCallback(async (metadata: Record<string, Partial<PdfFile>>) => {
+    try {
+      await AsyncStorage.setItem(METADATA_KEY, JSON.stringify(metadata));
+    } catch (error) {
+      console.error("Error saving metadata:", error);
+    }
+  }, [METADATA_KEY]);
+
+  const loadPdfFiles = useCallback(async () => {
     try {
       const dirInfo = await FileSystem.getInfoAsync(FileSystem.documentDirectory!);
       if (!dirInfo.exists) {
@@ -35,6 +56,10 @@ export function PdfProvider({ children }: { children: ReactNode }) {
 
       const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory!);
       const pdfFiles = files.filter(file => file.endsWith('.pdf'));
+      
+      // Load saved metadata
+      const savedMetadata = await loadMetadata();
+      let hasNewFiles = false;
 
       const pdfFileInfos: PdfFile[] = await Promise.all(
         pdfFiles.map(async (fileName) => {
@@ -56,41 +81,75 @@ export function PdfProvider({ children }: { children: ReactNode }) {
             hour12: false,
           });
 
+          // Merge with saved metadata
+          const metadata = savedMetadata[fileName];
+          
+          // If this is a new file (no metadata), save initial metadata
+          if (!metadata) {
+            hasNewFiles = true;
+            savedMetadata[fileName] = {
+              date,
+              time,
+              isFavorite: false,
+              updatedDate: date,
+            };
+          }
+
           return {
             id: fileName,
             name: fileName.replace(".pdf", ""),
-            date: date,
-            time: time,
+            date: metadata?.date || date,
+            time: metadata?.time || time,
             size: fileSize,
-            isFavorite: false,
-            updatedDate: date,
+            isFavorite: metadata?.isFavorite || false,
+            updatedDate: metadata?.updatedDate || date,
             uri: fileUri,
           };
         })
       );
 
+      // Save metadata if there are new files
+      if (hasNewFiles) {
+        await saveMetadata(savedMetadata);
+      }
+
       setPdfFiles(pdfFileInfos.sort((a, b) => b.id.localeCompare(a.id)));
     } catch (error) {
       console.error("Error loading PDF files:", error);
     }
-  };
+  }, [loadMetadata, saveMetadata]);
 
   useEffect(() => {
     loadPdfFiles();
-  }, []);
+  }, [loadPdfFiles]);
 
   const refreshPdfFiles = async () => {
     await loadPdfFiles();
   };
 
-  const addPdfFile = (file: PdfFile) => {
+  const addPdfFile = async (file: PdfFile) => {
     setPdfFiles((prev) => [file, ...prev]);
+    
+    // Save metadata
+    const metadata = await loadMetadata();
+    metadata[file.id] = {
+      date: file.date,
+      time: file.time,
+      isFavorite: file.isFavorite,
+      updatedDate: file.updatedDate,
+    };
+    await saveMetadata(metadata);
   };
 
-  const updatePdfFile = (id: string, updates: Partial<PdfFile>) => {
+  const updatePdfFile = async (id: string, updates: Partial<PdfFile>) => {
     setPdfFiles((prev) =>
       prev.map((file) => (file.id === id ? { ...file, ...updates } : file))
     );
+    
+    // Update metadata
+    const metadata = await loadMetadata();
+    metadata[id] = { ...metadata[id], ...updates };
+    await saveMetadata(metadata);
   };
 
   const deletePdfFile = async (id: string, uri?: string) => {
@@ -101,18 +160,39 @@ export function PdfProvider({ children }: { children: ReactNode }) {
       }
       // Xóa khỏi state
       setPdfFiles((prev) => prev.filter((file) => file.id !== id));
+      
+      // Xóa metadata
+      const metadata = await loadMetadata();
+      delete metadata[id];
+      await saveMetadata(metadata);
     } catch (error) {
       console.error("Error deleting file:", error);
       throw error;
     }
   };
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = async (id: string) => {
+    let newFavoriteValue: boolean | undefined;
+    
     setPdfFiles((prev) =>
-      prev.map((file) =>
-        file.id === id ? { ...file, isFavorite: !file.isFavorite } : file
-      )
+      prev.map((file) => {
+        if (file.id === id) {
+          newFavoriteValue = !file.isFavorite;
+          return { ...file, isFavorite: newFavoriteValue };
+        }
+        return file;
+      })
     );
+    
+    // Save to metadata
+    if (newFavoriteValue !== undefined) {
+      const metadata = await loadMetadata();
+      metadata[id] = {
+        ...metadata[id],
+        isFavorite: newFavoriteValue,
+      };
+      await saveMetadata(metadata);
+    }
   };
 
   return (
