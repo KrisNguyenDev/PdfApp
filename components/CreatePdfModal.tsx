@@ -50,7 +50,8 @@ export default function CreatePdfModal({
                       // Image to PDF
                       router.push("/create-pdf/image-selection");
                     } else if (option.id === "2") {
-                      // Scan Document - TODO: Implement later
+                      // Scan Document
+                      router.push("/create-pdf/scan-document");
                     }
                   }}
                   className="flex-row items-center px-5 py-4 border-b border-gray-100"

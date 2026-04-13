@@ -58,6 +58,10 @@ export default function RootLayout() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="pdf-viewer" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="create-pdf/scan-document"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </PdfProvider>
   );
