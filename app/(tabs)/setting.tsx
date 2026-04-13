@@ -41,23 +41,19 @@ const SettingItem = ({
 
 export default function Setting() {
   const handleShare = () => {
-    Alert.alert(
-      "Share App",
-      "Share this app with your friends and family!",
-      [
-        {
-          text: "Copy Link",
-          onPress: () => {
-            // In production, you would copy the actual app store link
-            Alert.alert("Success", "App link copied to clipboard!");
-          },
+    Alert.alert("Share App", "Share this app with your friends and family!", [
+      {
+        text: "Copy Link",
+        onPress: () => {
+          // In production, you would copy the actual app store link
+          Alert.alert("Success", "App link copied to clipboard!");
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ],
-    );
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
   const handleRate = () => {
@@ -69,7 +65,10 @@ export default function Setting() {
           text: "Rate Now",
           onPress: () => {
             // In production, this would open the app store
-            Alert.alert("Thanks!", "This will open the app store in production.");
+            Alert.alert(
+              "Thanks!",
+              "This will open the app store in production.",
+            );
           },
         },
         {
