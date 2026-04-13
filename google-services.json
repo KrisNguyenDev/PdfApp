@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "629360741847",
+    "project_id": "no01-e0be7",
+    "storage_bucket": "no01-e0be7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629360741847:android:9b94fdade588629aea4f92",
+        "android_client_info": {
+          "package_name": "com.pdf.alldocx.app.utility"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-gq6weMjjLiS4Xo4JRrOBiwJ_HbmyY6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
