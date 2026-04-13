@@ -17,7 +17,8 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.pdf.alldocx.app.utility",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
@@ -41,6 +42,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5684ec98-f267-4ef3-b578-5e98cf8b6b90"
+      }
     }
   }
 }
