@@ -1,7 +1,7 @@
 // File: hooks/useFirebaseAnalytics.ts
 // Ví dụ sử dụng Firebase Analytics
 
-import analytics from '@react-native-firebase/analytics';
+import analytics from "@react-native-firebase/analytics";
 
 export const useFirebaseAnalytics = () => {
   // Track screen view
@@ -13,20 +13,26 @@ export const useFirebaseAnalytics = () => {
   };
 
   // Track custom events
-  const logEvent = async (eventName: string, params?: { [key: string]: any }) => {
+  const logEvent = async (
+    eventName: string,
+    params?: { [key: string]: any },
+  ) => {
     await analytics().logEvent(eventName, params);
   };
 
   // Track button clicks
   const logButtonClick = async (buttonName: string) => {
-    await analytics().logEvent('button_click', {
+    await analytics().logEvent("button_click", {
       button_name: buttonName,
     });
   };
 
   // Track PDF actions
-  const logPdfAction = async (action: 'create' | 'view' | 'share' | 'delete', pdfName?: string) => {
-    await analytics().logEvent('pdf_action', {
+  const logPdfAction = async (
+    action: "create" | "view" | "share" | "delete",
+    pdfName?: string,
+  ) => {
+    await analytics().logEvent("pdf_action", {
       action_type: action,
       pdf_name: pdfName,
     });
